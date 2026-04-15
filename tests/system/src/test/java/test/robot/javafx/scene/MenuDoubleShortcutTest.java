@@ -190,6 +190,7 @@ public class MenuDoubleShortcutTest {
             });
 
             stage.setScene(scene);
+            stage.setAlwaysOnTop(true);
             stage.setOnShown(e -> {
                 Platform.runLater(() -> {
                     startupLatch.countDown();
