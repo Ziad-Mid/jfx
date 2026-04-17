@@ -57,7 +57,7 @@ public class MenuDoubleShortcutTest {
     static CountDownLatch startupLatch = new CountDownLatch(1);
 
     static volatile TestApp testApp;
-    static private final int delayMilliseconds = 100;
+    static volatile Scene testScene;
 
     private enum TestResult {
         // We provide an explanation of what happened. Since we only see this
@@ -99,7 +99,7 @@ public class MenuDoubleShortcutTest {
     void macSceneComesBeforeMenuBar() {
         Assumptions.assumeTrue(PlatformUtil.isMac());
         testApp.testKey(menuBarAndSceneKeyCode);
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         TestResult result = testApp.testResult();
         Assertions.assertEquals(TestResult.FIREDSCENE, result, result.errorExplanation());
     }
@@ -111,16 +111,16 @@ public class MenuDoubleShortcutTest {
     void nonMacMenuBarComesBeforeScene() {
         Assumptions.assumeFalse(PlatformUtil.isMac());
         testApp.testKey(menuBarAndSceneKeyCode);
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         TestResult result = testApp.testResult();
         Assertions.assertEquals(TestResult.FIREDMENUITEM, result, result.errorExplanation());
     }
 
     @Test
     void acceleratorOnlyInMenuBar() {
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         testApp.testKey(menuBarOnlyKeyCode);
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         TestResult result = testApp.testResult();
         Assertions.assertEquals(TestResult.FIREDMENUITEM, result, result.errorExplanation());
     }
@@ -128,7 +128,7 @@ public class MenuDoubleShortcutTest {
     @Test
     void acceleratorOnlyInScene() {
         testApp.testKey(sceneOnlyKeyCode);
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         TestResult result = testApp.testResult();
         Assertions.assertEquals(TestResult.FIREDSCENE, result, result.errorExplanation());
     }
@@ -136,7 +136,7 @@ public class MenuDoubleShortcutTest {
     @Test
     void acceleratorAbsent() {
         testApp.testKey(noAcceleratorKeyCode);
-        Util.sleep(delayMilliseconds);
+        Util.waitForIdle(testScene);
         TestResult result = testApp.testResult();
         Assertions.assertEquals(TestResult.IGNORED, result, result.errorExplanation());
     }
@@ -189,6 +189,7 @@ public class MenuDoubleShortcutTest {
                 sceneAcceleratorFired = true;
             });
 
+            testScene = scene;
             stage.setScene(scene);
             stage.setAlwaysOnTop(true);
             stage.setOnShown(e -> {
@@ -200,19 +201,18 @@ public class MenuDoubleShortcutTest {
         }
 
         public void testKey(KeyCode code) {
-            sceneAcceleratorFired = false;
-            menuBarItemFired = false;
-            CountDownLatch testKeyLatch = new CountDownLatch(1);
-            Platform.runLater(() -> {
+            Util.runAndWait(() -> {
+                sceneAcceleratorFired = false;
+                menuBarItemFired = false;
+            });
+            Util.runAndWait(() -> {
                 KeyCode shortcutCode = (PlatformUtil.isMac() ? KeyCode.COMMAND : KeyCode.CONTROL);
                 Robot robot = new Robot();
                 robot.keyPress(shortcutCode);
                 robot.keyPress(code);
                 robot.keyRelease(code);
                 robot.keyRelease(shortcutCode);
-                testKeyLatch.countDown();
             });
-            Util.waitForLatch(testKeyLatch, 5, "Timeout waiting for testKey execution.");
         }
 
         public TestResult testResult() {
