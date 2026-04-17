@@ -153,8 +153,8 @@ public class MenuDoubleShortcutTest {
 
     public static class TestApp extends Application {
 
-        private boolean sceneAcceleratorFired = false;
-        private boolean menuBarItemFired = false;
+        private volatile boolean sceneAcceleratorFired = false;
+        private volatile boolean menuBarItemFired = false;
 
         private MenuItem createMenuItem(KeyCombination accelerator) {
             MenuItem menuItem = new MenuItem(accelerator.getName() + " menu item");
