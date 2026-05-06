@@ -383,7 +383,6 @@ public class PrismTextLayout implements TextLayout {
             lineY = location.y;
             lineHeight = line.getBounds().getHeight();
         }
-
         if (isMirrored()) {
             lineX = getMirroringWidth() - lineX;
         }
