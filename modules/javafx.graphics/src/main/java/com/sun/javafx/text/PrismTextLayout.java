@@ -383,9 +383,7 @@ public class PrismTextLayout implements TextLayout {
             lineY = location.y;
             lineHeight = line.getBounds().getHeight();
         }
-        if (isMirrored()) {
-            lineX = getMirroringWidth() - lineX;
-        }
+
 
         if (splitCaretOffset != -1) {
             for (int i = 0; i < runs.length; i++) {
@@ -400,9 +398,6 @@ public class PrismTextLayout implements TextLayout {
                             if ((level & 1) != 0) lineX2 += run.getWidth();
                         } else {
                             if ((level & 1) == 0) lineX2 += run.getWidth();
-                        }
-                        if (isMirrored()) {
-                            lineX2 = getMirroringWidth() - lineX2;
                         }
                         // split caret
                         return new TextLayout.CaretGeometry.Split(
@@ -573,26 +568,14 @@ public class PrismTextLayout implements TextLayout {
                     /* Merge continuous rectangles */
                     if (runLeft != right) {
                         if (left != -1 && right != -1) {
-                            float l = left, r = right;
-                            if (isMirrored()) {
-                                float width = getMirroringWidth();
-                                l = width - l;
-                                r = width - r;
-                            }
-                            client.addRectangle(l, top, r, bottom);
+                            client.addRectangle(left, top, right, bottom);
                         }
                         left = runLeft;
                         right = runRight;
                     }
                     right = runRight;
                     if (count == 0) {
-                        float l = left, r = right;
-                        if (isMirrored()) {
-                            float width = getMirroringWidth();
-                            l = width - l;
-                            r = width - r;
-                        }
-                        client.addRectangle(l, top, r, bottom);
+                        client.addRectangle(left, top, right, bottom);
                     }
                 }
                 lineX += runWidth;
